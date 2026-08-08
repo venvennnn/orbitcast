@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OrbitCast</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"DM Sans"', 'sans-serif'],
+            mono: ['"IBM Plex Mono"', 'monospace'],
+          },
+          colors: {
+            ink: '#0c1222',
+            panel: '#141c2e',
+            line: '#243049',
+            mint: '#5eead4',
+            sand: '#e8e4d9',
+            warn: '#fbbf24',
+            bad: '#f87171',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: radial-gradient(1200px 600px at 10% -10%, #1a2744, transparent), #0c1222; }
+    .chip { font-family: "IBM Plex Mono", monospace; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 0.25rem; border-width: 1px; }
+    .stage-pulse { animation: pulse 1.4s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .55; } }
+  </style>
+</head>
+<body class="text-sand font-sans min-h-screen">
+  <div class="max-w-5xl mx-auto px-4 py-10">
+    <header class="mb-10">
+      <p class="font-mono text-mint text-sm tracking-widest uppercase mb-2">Zerops Challenge · living feeds</p>
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight">OrbitCast</h1>
+      <p class="mt-3 text-sand/70 max-w-2xl">Type any topic. Research → script → voice → RSS. Podcasts that don't go stale.</p>
+      <div id="metrics" class="mt-5 flex flex-wrap gap-3 font-mono text-xs text-sand/60"></div>
+    </header>
+
+    <section class="border border-line bg-panel/80 p-5 mb-8">
+      <h2 class="text-lg font-semibold mb-4">Create a feed</h2>
+      <form id="create-form" class="grid gap-3 md:grid-cols-2">
+        <label class="block md:col-span-1">
+          <span class="text-xs font-mono text-sand/50">Title</span>
+          <input name="title" required placeholder="Weekend tech news"
+            class="mt-1 w-full bg-ink border border-line px-3 py-2 outline-none focus:border-mint" />
+        </label>
+        <label class="block md:col-span-1">
+          <span class="text-xs font-mono text-sand/50">Schedule (minutes)</span>
+          <input name="schedule_minutes" type="number" min="5" value="30"
+            class="mt-1 w-full bg-ink border border-line px-3 py-2 outline-none focus:border-mint" />
+        </label>
+        <label class="block md:col-span-2">
+          <span class="text-xs font-mono text-sand/50">Topic prompt</span>
+          <textarea name="topic_prompt" required rows="3"
+            placeholder="Cover what's new in AI infrastructure and developer tools this week. Skip rumor. Prefer shipping news."
+            class="mt-1 w-full bg-ink border border-line px-3 py-2 outline-none focus:border-mint"></textarea>
+        </label>
+        <button type="submit"
+          class="md:col-span-2 bg-mint text-ink font-semibold px-4 py-2 w-fit hover:brightness-110">
+          Create &amp; generate episode #1
+        </button>
+      </form>
+      <p id="form-status" class="mt-3 text-sm font-mono text-sand/50"></p>
+    </section>
+
+    <section>
+      <div class="flex items-end justify-between mb-4">
+        <h2 class="text-lg font-semibold">Feeds</h2>
+        <p class="font-mono text-xs text-sand/40">polling every 2s</p>
+      </div>
+      <div id="feeds" class="grid gap-4"></div>
+    </section>
+  </div>
+  <script src="./app.js"></script>
+</body>
+</html>

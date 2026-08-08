@@ -1,0 +1,21 @@
+# Secrets & junk — never push these
+.env
+.env.*
+!.env.example
+**/.env
+**/vendor/
+**/__pycache__/
+**/*.pyc
+**/.git/
+.DS_Store
+*.pem
+*.key
+.venv/
+venv/
+node_modules/
+
+# Local agent / IDE
+.cursor/
+.claude/
+CLAUDE.md
+AGENTS.md

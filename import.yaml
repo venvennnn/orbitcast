@@ -1,0 +1,37 @@
+# Public import skeleton for OrbitCast — NO secrets.
+# Set ANTHROPIC_API_KEY (and optional OPENAI_API_KEY) as project env in the GUI after import.
+
+services:
+  - hostname: db
+    type: postgresql:single@18
+    profile: oltp-hobby
+    priority: 10
+
+  - hostname: queue
+    type: valkey:single@7.2
+    profile: hobby
+    priority: 10
+
+  - hostname: objectstorage
+    type: object-storage
+    objectStorageSize: 2
+    objectStoragePolicy: public-read
+    priority: 10
+
+  - hostname: api
+    type: python@3.12
+    enableSubdomainAccess: true
+    startWithoutCode: true
+
+  - hostname: web
+    type: nginx@1.22
+    enableSubdomainAccess: true
+    startWithoutCode: true
+
+  - hostname: worker
+    type: python@3.12
+    startWithoutCode: true
+
+  - hostname: cron
+    type: python@3.12
+    startWithoutCode: true

@@ -1,0 +1,27 @@
+zerops:
+  - setup: worker
+    build:
+      base: python@3.12
+      # edge-tts needs no system ffmpeg for mp3 output
+      buildCommands:
+        - rm -rf ./vendor
+        - pip install --target=./vendor -r requirements.txt
+      deployFiles:
+        - .
+    run:
+      base: python@3.12
+      envVariables:
+        PYTHONPATH: /var/www/vendor:/var/www
+        DATABASE_URL: postgresql://${db_user}:${db_password}@${db_hostname}:${db_port}/${db_dbName}
+        REDIS_URL: ${queue_connectionString}
+        QUEUE_KEY: orbitcast:jobs
+        S3_ENDPOINT: ${objectstorage_apiUrl}
+        S3_ACCESS_KEY: ${objectstorage_accessKeyId}
+        S3_SECRET_KEY: ${objectstorage_secretAccessKey}
+        S3_BUCKET: ${objectstorage_bucketName}
+        S3_REGION: us-east-1
+        AWS_USE_PATH_STYLE_ENDPOINT: "true"
+        ANTHROPIC_MODEL: claude-haiku-4-5
+        TTS_VOICE: en-US-JennyNeural
+      # Project-level ANTHROPIC_API_KEY / OPENAI_API_KEY inject automatically
+      start: python -u /var/www/worker.py

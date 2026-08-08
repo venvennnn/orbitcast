@@ -1,0 +1,22 @@
+zerops:
+  - setup: cron
+    build:
+      base: python@3.12
+      buildCommands:
+        - rm -rf ./vendor
+        - pip install --target=./vendor -r requirements.txt
+      deployFiles:
+        - .
+    run:
+      base: python@3.12
+      envVariables:
+        PYTHONPATH: /var/www/vendor:/var/www
+        DATABASE_URL: postgresql://${db_user}:${db_password}@${db_hostname}:${db_port}/${db_dbName}
+        REDIS_URL: ${queue_connectionString}
+        QUEUE_KEY: orbitcast:jobs
+      # Keep container alive; crontab does the work
+      start: zsc noop --silent
+      crontab:
+        - command: python /var/www/enqueue.py
+          timing: "*/5 * * * *"
+          allContainers: false
