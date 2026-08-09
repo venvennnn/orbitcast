@@ -1,7 +1,8 @@
 # OrbitCast
 **Podcasts that don't go stale.** Type any topic → research → script → TTS → public MP3 → real RSS podcast feed. A cron keeps every active feed alive.
-> Zerops Challenge · Aug 8–9, 2026  
-> Live dashboard: https://web-13d.sea1.zerops.app  
+
+> Live Application: https://web-13d.sea1.zerops.app
+ 
 > Live API: https://api-13d-8000.sea1.zerops.app
 
 ## TL;DR for judges
