@@ -32,7 +32,7 @@ Internal traffic on the private network; only `web` / `api` are public. Object s
 
 Manual `POST /feeds/{id}/refresh` always forces generation (demo-safe).
 
-## Secrets (never commit)
+## Secrets
 
 Set as **Zerops project env** (not in git):
 
