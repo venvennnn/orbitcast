@@ -17,69 +17,147 @@
             mono: ['"IBM Plex Mono"', 'monospace'],
           },
           colors: {
-            ink: '#0c1222',
-            panel: '#141c2e',
-            line: '#243049',
-            mint: '#5eead4',
-            sand: '#e8e4d9',
-            warn: '#fbbf24',
-            bad: '#f87171',
+            ink: '#0f2744',
+            sky: '#3b82f6',
+            ice: '#eff6ff',
+            mist: '#dbeafe',
+            line: '#bfdbfe',
+            warn: '#d97706',
+            bad: '#dc2626',
+            ok: '#0284c7',
           }
         }
       }
     }
   </script>
   <style>
-    body { background: radial-gradient(1200px 600px at 10% -10%, #1a2744, transparent), #0c1222; }
-    .chip { font-family: "IBM Plex Mono", monospace; font-size: 0.75rem; padding: 0.125rem 0.5rem; border-radius: 0.25rem; border-width: 1px; }
+    body {
+      background:
+        radial-gradient(900px 480px at 85% -10%, rgba(147, 197, 253, 0.55), transparent 60%),
+        radial-gradient(700px 420px at 0% 20%, rgba(219, 234, 254, 0.9), transparent 55%),
+        linear-gradient(180deg, #ffffff 0%, #f0f7ff 45%, #e8f2ff 100%);
+      min-height: 100vh;
+    }
+    .chip {
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.75rem;
+      padding: 0.125rem 0.5rem;
+      border-radius: 999px;
+      border-width: 1px;
+      background: #fff;
+    }
     .stage-pulse { animation: pulse 1.4s ease-in-out infinite; }
     @keyframes pulse { 50% { opacity: .55; } }
+    .panel {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(10px);
+      border: 1px solid #bfdbfe;
+      box-shadow: 0 10px 30px rgba(59, 130, 246, 0.08);
+    }
+    #player-bar {
+      position: sticky;
+      bottom: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.95);
+      border-top: 1px solid #bfdbfe;
+      backdrop-filter: blur(12px);
+    }
+    details > summary { list-style: none; }
+    details > summary::-webkit-details-marker { display: none; }
   </style>
 </head>
-<body class="text-sand font-sans min-h-screen">
-  <div class="max-w-5xl mx-auto px-4 py-10">
+<body class="text-ink font-sans">
+  <div class="max-w-5xl mx-auto px-4 py-10 pb-36">
     <header class="mb-10">
-      <p class="font-mono text-mint text-sm tracking-widest uppercase mb-2">Zerops Challenge · living feeds</p>
-      <h1 class="text-4xl md:text-5xl font-bold tracking-tight">OrbitCast</h1>
-      <p class="mt-3 text-sand/70 max-w-2xl">Type any topic. Research → script → voice → RSS. Podcasts that don't go stale.</p>
-      <div id="metrics" class="mt-5 flex flex-wrap gap-3 font-mono text-xs text-sand/60"></div>
+      <p class="font-mono text-sky text-sm tracking-widest uppercase mb-2">Zerops Challenge · living feeds</p>
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-ink">OrbitCast</h1>
+      <p class="mt-3 text-ink/65 max-w-2xl text-lg">
+        Podcasts that don't go stale. Type a topic once — get a real RSS series that keeps publishing.
+      </p>
+
+      <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <div class="panel rounded-2xl p-4">
+          <p class="font-mono text-xs uppercase tracking-wider text-sky mb-2">Not another NotebookLM dump</p>
+          <ul class="space-y-2 text-sm text-ink/70">
+            <li><span class="font-semibold text-ink">Living series, not a file.</span> NotebookLM gives you one audio export. OrbitCast gives you a subscribe-able RSS feed in a normal podcast app.</li>
+            <li><span class="font-semibold text-ink">Change-aware episodes.</span> Each run sees the last scripts and reports only what’s new — or skips when nothing episode-worthy happened.</li>
+            <li><span class="font-semibold text-ink">Keeps going by itself.</span> Cron re-enqueues active feeds on a schedule; hit Refresh live for episode #2 on camera.</li>
+          </ul>
+        </div>
+        <div class="panel rounded-2xl p-4">
+          <p class="font-mono text-xs uppercase tracking-wider text-sky mb-2">Built on Zerops</p>
+          <ul class="space-y-1.5 text-sm text-ink/70 font-mono">
+            <li><span class="text-ink font-semibold">web</span> · nginx dashboard</li>
+            <li><span class="text-ink font-semibold">api</span> · FastAPI CRUD + RSS</li>
+            <li><span class="text-ink font-semibold">worker</span> · research → TTS → upload</li>
+            <li><span class="text-ink font-semibold">cron</span> · scheduled enqueue</li>
+            <li><span class="text-ink font-semibold">db</span> · managed PostgreSQL</li>
+            <li><span class="text-ink font-semibold">queue</span> · managed Valkey (BRPOP)</li>
+            <li><span class="text-ink font-semibold">objectstorage</span> · public MP3s (S3/MinIO)</li>
+          </ul>
+          <p class="mt-3 text-xs text-ink/50">Private networking between services; only web + api are public.</p>
+        </div>
+      </div>
+
+      <div id="metrics" class="mt-5 flex flex-wrap gap-3 font-mono text-xs text-ink/50"></div>
     </header>
 
-    <section class="border border-line bg-panel/80 p-5 mb-8">
+    <section class="panel rounded-2xl p-5 mb-8">
       <h2 class="text-lg font-semibold mb-4">Create a feed</h2>
       <form id="create-form" class="grid gap-3 md:grid-cols-2">
         <label class="block md:col-span-1">
-          <span class="text-xs font-mono text-sand/50">Title</span>
+          <span class="text-xs font-mono text-ink/45">Title</span>
           <input name="title" required placeholder="Weekend tech news"
-            class="mt-1 w-full bg-ink border border-line px-3 py-2 outline-none focus:border-mint" />
+            class="mt-1 w-full bg-white border border-line rounded-xl px-3 py-2 outline-none focus:border-sky focus:ring-2 focus:ring-sky/20" />
         </label>
         <label class="block md:col-span-1">
-          <span class="text-xs font-mono text-sand/50">Schedule (minutes)</span>
+          <span class="text-xs font-mono text-ink/45">Schedule (minutes)</span>
           <input name="schedule_minutes" type="number" min="5" value="30"
-            class="mt-1 w-full bg-ink border border-line px-3 py-2 outline-none focus:border-mint" />
+            class="mt-1 w-full bg-white border border-line rounded-xl px-3 py-2 outline-none focus:border-sky focus:ring-2 focus:ring-sky/20" />
+        </label>
+        <label class="flex items-start gap-3 md:col-span-2 mt-1 panel rounded-xl p-3 border border-line bg-white/70">
+          <input name="recap_previous" type="checkbox" checked
+            class="mt-1 h-4 w-4 accent-sky" />
+          <span>
+            <span class="text-sm font-semibold text-ink">Recap previous episode (~20s)</span>
+            <span class="block text-xs text-ink/55 mt-0.5">
+              From episode 2 onward, open with a short spoken summary of last time, then cover what’s new.
+            </span>
+          </span>
         </label>
         <label class="block md:col-span-2">
-          <span class="text-xs font-mono text-sand/50">Topic prompt</span>
+          <span class="text-xs font-mono text-ink/45">Topic prompt</span>
           <textarea name="topic_prompt" required rows="3"
             placeholder="Cover what's new in AI infrastructure and developer tools this week. Skip rumor. Prefer shipping news."
-            class="mt-1 w-full bg-ink border border-line px-3 py-2 outline-none focus:border-mint"></textarea>
+            class="mt-1 w-full bg-white border border-line rounded-xl px-3 py-2 outline-none focus:border-sky focus:ring-2 focus:ring-sky/20"></textarea>
         </label>
         <button type="submit"
-          class="md:col-span-2 bg-mint text-ink font-semibold px-4 py-2 w-fit hover:brightness-110">
+          class="md:col-span-2 bg-sky text-white font-semibold px-4 py-2.5 rounded-xl w-fit hover:bg-sky/90 shadow-sm shadow-sky/30">
           Create &amp; generate episode #1
         </button>
       </form>
-      <p id="form-status" class="mt-3 text-sm font-mono text-sand/50"></p>
+      <p id="form-status" class="mt-3 text-sm font-mono text-ink/45"></p>
     </section>
 
     <section>
       <div class="flex items-end justify-between mb-4">
         <h2 class="text-lg font-semibold">Feeds</h2>
-        <p class="font-mono text-xs text-sand/40">polling every 2s</p>
+        <p class="font-mono text-xs text-ink/35">polling every 2s</p>
       </div>
       <div id="feeds" class="grid gap-4"></div>
     </section>
   </div>
+
+  <div id="player-bar" class="hidden">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-2 md:flex-row md:items-center md:gap-4">
+      <div class="min-w-0 flex-1">
+        <p id="player-title" class="text-sm font-semibold truncate">—</p>
+        <p id="player-meta" class="text-xs font-mono text-ink/45 truncate">Ready</p>
+      </div>
+      <audio id="player" class="w-full md:w-[420px]" controls preload="auto"></audio>
+    </div>
+  </div>
+
   <script src="./app.js"></script>
 </body>
 </html>

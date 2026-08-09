@@ -61,6 +61,7 @@ def process_episode(episode_id: str, *, force: bool = False) -> None:
                 feed["topic_prompt"],
                 prior_scripts,
                 force=force,
+                recap_previous=bool(feed.get("recap_previous", True)),
             )
 
             if result.get("skip"):

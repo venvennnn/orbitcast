@@ -2,6 +2,12 @@
 
 Running log for judge-prep and the build post. Newest first.
 
+## 2026-08-09 — Browser audio + light UI
+
+- Dashboard: white / light-blue gradient; sticky player outside the polled list.
+- Browser MP3 cutoff root causes: (1) 2s poll `innerHTML` destroyed `<audio>`; (2) object storage Range → HTTP 200 not 206.
+- Fix: `GET /episodes/{id}/audio` on API returns real `206` + `Content-Range`; Play buttons use that URL. RSS still uses public object URLs.
+
 ## 2026-08-08 — First real episode shipped end-to-end
 
 - **ANTHROPIC_API_KEY** set at project scope; worker research+script works (`claude-haiku-4-5` + web_search).

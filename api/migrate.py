@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS episodes (
 
 CREATE INDEX IF NOT EXISTS idx_episodes_feed_created ON episodes (feed_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_feeds_active_schedule ON feeds (active, last_generated_at);
+
+ALTER TABLE feeds ADD COLUMN IF NOT EXISTS recap_previous BOOLEAN NOT NULL DEFAULT TRUE;
 """
 
 

@@ -46,18 +46,24 @@ def get_feed_by_slug(slug: str) -> dict[str, Any] | None:
         return db.fetchone(conn, "SELECT * FROM feeds WHERE slug = %s", (slug,))
 
 
-def create_feed(title: str, topic_prompt: str, schedule_minutes: int = 60) -> dict[str, Any]:
+def create_feed(
+    title: str,
+    topic_prompt: str,
+    schedule_minutes: int = 60,
+    *,
+    recap_previous: bool = True,
+) -> dict[str, Any]:
     slug = _slugify(title)
     schedule_minutes = max(5, min(schedule_minutes, 10080))
     with db.db() as conn:
         feed = db.fetchone(
             conn,
             """
-            INSERT INTO feeds (title, topic_prompt, slug, schedule_minutes, active)
-            VALUES (%s, %s, %s, %s, TRUE)
+            INSERT INTO feeds (title, topic_prompt, slug, schedule_minutes, active, recap_previous)
+            VALUES (%s, %s, %s, %s, TRUE, %s)
             RETURNING *
             """,
-            (title, topic_prompt, slug, schedule_minutes),
+            (title, topic_prompt, slug, schedule_minutes, recap_previous),
         )
         assert feed
         episode = _insert_queued(conn, str(feed["id"]))
@@ -69,6 +75,11 @@ def create_feed(title: str, topic_prompt: str, schedule_minutes: int = 60) -> di
         jobqueue.enqueue(str(episode["id"]))  # plain id → worker force=True
         feed["latest_episode_id"] = episode["id"]
         return feed
+
+
+def get_episode(episode_id: str) -> dict[str, Any] | None:
+    with db.db() as conn:
+        return db.fetchone(conn, "SELECT * FROM episodes WHERE id = %s", (episode_id,))
 
 
 def list_episodes(feed_id: str) -> list[dict[str, Any]]:

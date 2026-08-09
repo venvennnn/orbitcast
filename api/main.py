@@ -2,18 +2,19 @@
 
 from __future__ import annotations
 
+import urllib.request
 from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+import broker as jobqueue
 import config
 import db
 import feeds as feed_svc
-import broker as jobqueue
 import rss
 from migrate import SCHEMA
 
@@ -43,6 +44,7 @@ class CreateFeedBody(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     topic_prompt: str = Field(min_length=1, max_length=4000)
     schedule_minutes: int = Field(default=60, ge=5, le=10080)
+    recap_previous: bool = True
 
 
 @app.on_event("startup")
@@ -92,7 +94,12 @@ def list_feeds() -> list:
 
 @app.post("/feeds", status_code=201)
 def create_feed(body: CreateFeedBody) -> dict:
-    feed = feed_svc.create_feed(body.title, body.topic_prompt, body.schedule_minutes)
+    feed = feed_svc.create_feed(
+        body.title,
+        body.topic_prompt,
+        body.schedule_minutes,
+        recap_previous=body.recap_previous,
+    )
     return _jsonable(feed)
 
 
@@ -130,6 +137,43 @@ def retry_episode(episode_id: str) -> dict:
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from None
     return _jsonable(ep)
+
+
+@app.get("/episodes/{episode_id}/audio")
+def episode_audio(episode_id: str, request: Request) -> Response:
+    """Browser player endpoint — real HTTP 206 Range (object storage returns 200)."""
+    ep = feed_svc.get_episode(episode_id)
+    if not ep or ep.get("status") != "completed" or not ep.get("audio_url"):
+        raise HTTPException(404, "audio not found")
+
+    with urllib.request.urlopen(ep["audio_url"], timeout=60) as resp:
+        data = resp.read()
+    total = len(data)
+    range_header = request.headers.get("range") or request.headers.get("Range")
+
+    headers = {
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "public, max-age=3600",
+        "Content-Type": "audio/mpeg",
+    }
+
+    if range_header and range_header.startswith("bytes="):
+        spec = range_header.replace("bytes=", "").strip()
+        start_s, _, end_s = spec.partition("-")
+        try:
+            start = int(start_s) if start_s else 0
+            end = int(end_s) if end_s else total - 1
+        except ValueError:
+            start, end = 0, total - 1
+        end = min(end, total - 1)
+        start = max(0, min(start, end))
+        chunk = data[start : end + 1]
+        headers["Content-Range"] = f"bytes {start}-{end}/{total}"
+        headers["Content-Length"] = str(len(chunk))
+        return Response(content=chunk, status_code=206, headers=headers, media_type="audio/mpeg")
+
+    headers["Content-Length"] = str(total)
+    return Response(content=data, status_code=200, headers=headers, media_type="audio/mpeg")
 
 
 @app.get("/feed/{slug}.xml")
